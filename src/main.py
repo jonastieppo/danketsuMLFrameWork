@@ -1,5 +1,6 @@
 # %%
 import pandas as pd
+from binomialNegativeModel import BinomialCanonicalFunction
 from common.argumentsChecker import argumentChecker, argumentTypeChecker
 from common.modelLibraries import ModelLibraries
 from poissonModel import PoissonCanonicalFunction, PoissonModel
@@ -35,40 +36,42 @@ class DanketsuML():
         '''
         Calcultes de Poisson model
         '''
-        if library=='smf':
-            formula = kwargs.get("formula")
-            # check if the arguments passed is valid
-            argumentChecker(kwargs, "formula")
-            if argumentTypeChecker(str, formula):
-                PoissonClass = PoissonModel(self,library,formula=formula)
-                self.lastPredictionMethod = PoissonClass.predictLastModel
-                self.lastShowMethod = PoissonClass.showLastResults
+        self.library = library
+        self.modelkwArgs = kwargs
+        PoissonClass = PoissonModel(self)
+        self.lastPredictionMethod = PoissonClass.predictLastModel
+        self.lastShowMethod = PoissonClass.showLastResults
 
         return PoissonCanonicalFunction()
     
-
-
     
-    # def NegBinomial(self, library : ModelLibraries = None, **kwargs):
-    #     '''
-    #     Fits a model using negative binomial procedure
-    #     '''
-    #     if library=='smf':
-    #         formula = kwargs.get("formula")
-    #         formula = kwargs.get("n_samples")
+    def NegBinomial(self, library : ModelLibraries = None, **kwargs):
+        '''
+        Fits a model using negative binomial procedure
+        '''
+        if library=='smf':
+            formula = kwargs.get("formula")
+            formula = kwargs.get("n_samples")
 
-    #         # check if the arguments passed is valid
-    #         self.__argumentChecker(kwargs, "formula")
-    #         self.__argumentChecker(kwargs, "n_samples")
+            # check if the arguments passed is valid
+            self.__argumentChecker(kwargs, "formula")
+            self.__argumentChecker(kwargs, "n_samples")
             
-    #         if self.__argumentTypeChecker(str, formula):
-    #             self.modelo_poisson = smf.glm(formula=formula,
-    #                                     data=self.dataframe,
-    #                                     family=sm.families.Poisson()).fit()
+            if self.__argumentTypeChecker(str, formula):
+                self.modelo_poisson = smf.glm(formula=formula,
+                                        data=self.dataframe,
+                                        family=sm.families.Poisson()).fit()
 
-    #         # Parâmetros do 'modelo_poisson'
-    #         self.last_library = "smf"
-    #         self.last_model =  "poisson"
+            # Parâmetros do 'modelo_poisson'
+            self.last_library = "smf"
+            self.last_model =  "poisson"
+
+        self.library = library
+        self.modelkwArgs = kwargs
+        BinomialClass = PoissonModel(self)
+        self.lastPredictionMethod = BinomialClass.predictLastModel
+        self.lastShowMethod = BinomialClass.showLastResults
         
-    #     return PoissonCanonicalFunction()
+        return BinomialCanonicalFunction()
+
 # %%

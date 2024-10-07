@@ -17,23 +17,21 @@ from tqdm import tqdm # para mostrar o progresso do loop
 from common.modelLibraries import ModelLibraries
 from templates.templates import DanketsuTemplate
 
-class PoissonCanonicalFunction():
+class BinomialCanonicalFunction():
     '''
     Class to eval the Poisson canonical function
     '''
     def __repr__(self):
-        if(self.__logitEval):
-            return f"""
-    logit = {self.__logitEval:.4f}
-    chance = {np.exp(self.__logitEval):.4f}
-            """
+        return f"""
+logit = {self.__logitEval:.4f}
+chance = {np.exp(self.__logitEval):.4f}
+        """
     
     def __str__(self):
-        if(self.__logitEval):
-            return f"""
-    logit = {self.__logitEval:.4f}
-    chance = {np.exp(self.__logitEval):.4f}
-            """
+        return f"""
+logit = {self.__logitEval:.4f}
+chance = {np.exp(self.__logitEval):.4f}
+        """
 
     def set_params(self, *params):
         '''
@@ -56,7 +54,7 @@ class PoissonCanonicalFunction():
         return summ
     
 
-class PoissonModel():
+class BinomialNegativeModel():
 
 
     def __init__(self, generalClass : DanketsuTemplate) -> None:
