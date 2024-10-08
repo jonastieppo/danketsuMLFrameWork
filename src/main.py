@@ -1,9 +1,10 @@
 # %%
 import pandas as pd
-from binomialNegativeModel import BinomialCanonicalFunction
+from binomialNegativeModel import BinomialCanonicalFunction, BinomialNegativeModel
 from common.argumentsChecker import argumentChecker, argumentTypeChecker
 from common.modelLibraries import ModelLibraries
 from poissonModel import PoissonCanonicalFunction, PoissonModel
+from lrTest import lrTest
 
 class DanketsuML():
     '''
@@ -30,7 +31,13 @@ class DanketsuML():
                                         "temperatura":[123.43]
                                         }))
         '''
-        return self.lastPredictionMethod(dependentVars)
+        return self.makePredictionLastModel(dependentVars)
+    
+    def getLastModel(self):
+        '''
+        Method to acess last used Model
+        '''
+        return self.lastUsedModel
 
     def PoissonModel(self, library : ModelLibraries = None, **kwargs):
         '''
@@ -39,8 +46,9 @@ class DanketsuML():
         self.library = library
         self.modelkwArgs = kwargs
         PoissonClass = PoissonModel(self)
-        self.lastPredictionMethod = PoissonClass.predictLastModel
+        self.makePredictionLastModel = PoissonClass.predictLastModel
         self.lastShowMethod = PoissonClass.showLastResults
+        self.lastUsedModel = PoissonClass.model
 
         return PoissonCanonicalFunction()
     
@@ -49,29 +57,23 @@ class DanketsuML():
         '''
         Fits a model using negative binomial procedure
         '''
-        if library=='smf':
-            formula = kwargs.get("formula")
-            formula = kwargs.get("n_samples")
-
-            # check if the arguments passed is valid
-            self.__argumentChecker(kwargs, "formula")
-            self.__argumentChecker(kwargs, "n_samples")
-            
-            if self.__argumentTypeChecker(str, formula):
-                self.modelo_poisson = smf.glm(formula=formula,
-                                        data=self.dataframe,
-                                        family=sm.families.Poisson()).fit()
-
-            # Parâmetros do 'modelo_poisson'
-            self.last_library = "smf"
-            self.last_model =  "poisson"
-
         self.library = library
         self.modelkwArgs = kwargs
-        BinomialClass = PoissonModel(self)
-        self.lastPredictionMethod = BinomialClass.predictLastModel
-        self.lastShowMethod = BinomialClass.showLastResults
-        
+        BiNegClass = BinomialNegativeModel(self)
+        self.makePredictionLastModel = BiNegClass.predictLastModel
+        self.lastShowMethod = BiNegClass.showLastResults
+        self.lastUsedModel = BiNegClass.model
+
         return BinomialCanonicalFunction()
+    
+    def lrtest(self,models):
+        '''
+        Executa o teste da razão da verossimilhança
+        '''
+        if not self.library:
+            raise Exception("Please, perform a prediction first")
+        
+        lrTest(models=models, library=self.library)
+
 
 # %%

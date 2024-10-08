@@ -6,3 +6,11 @@ class DanketsuTemplate():
     '''
     modelkwArgs : object
     dataframe : pd.DataFrame
+    library : str
+
+class SMFTemplate():
+    '''
+    Class to anotate some properties of the smf class
+    '''
+    llf : float
+    llnull : float

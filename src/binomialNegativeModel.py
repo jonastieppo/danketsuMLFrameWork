@@ -16,6 +16,8 @@ from statsmodels.iolib.summary2 import summary_col # comparação entre modelos
 from tqdm import tqdm # para mostrar o progresso do loop
 from common.modelLibraries import ModelLibraries
 from templates.templates import DanketsuTemplate
+from tqdm import tqdm # para mostrar o progresso do loop
+
 
 class BinomialCanonicalFunction():
     '''
@@ -61,15 +63,41 @@ class BinomialNegativeModel():
 
         if generalClass.library=='smf':
             formula = generalClass.modelkwArgs.get("formula")
+            n_samples = generalClass.modelkwArgs.get("n_samples")
             # check if the arguments passed is valid
             argumentChecker(generalClass.modelkwArgs, "formula")
-            if argumentTypeChecker(str, formula):
+            argumentChecker(generalClass.modelkwArgs, "n_samples")
+            # check the type of the arguments
+            if bool(argumentTypeChecker(str, formula)*argumentTypeChecker(int,n_samples)):
+                
+                # Encontra o Phi otimo
+                best_phi = self.__findBestPhi(generalClass.dataframe, formula=formula,n_samples=n_samples)
                 self.model = smf.glm(formula=formula,
                                             data=generalClass.dataframe,
-                                            family=sm.families.Poisson()).fit()
+                                            family=sm.families.NegativeBinomial(alpha=best_phi)).fit()
 
-            # Parâmetros do 'modelo_poisson'
+                self.model.CustomModelName = "Binomial Negative"
+
             self.library_used = "smf"
+
+    def __findBestPhi(self, dataframe : pd.DataFrame, formula : str, n_samples : int):
+        '''
+        Private method to find the best phi, based on a quantity of samples
+        '''
+        alphas = np.linspace(0, 10, n_samples)
+        llf = np.full(n_samples, fill_value=np.nan)
+
+        for i, alpha in tqdm(enumerate(alphas), total=n_samples, desc='Estimating'):
+            try:
+                model = smf.glm(formula=formula,
+                                data=dataframe,
+                                family=sm.families.NegativeBinomial(alpha=alpha)).fit()
+            except:
+                continue
+            llf[i] = model.llf
+
+        return alphas[np.nanargmax(llf)]
+
 
     def showLastResults(self):
 

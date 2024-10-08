@@ -69,7 +69,7 @@ class PoissonModel():
                 self.model = smf.glm(formula=formula,
                                             data=generalClass.dataframe,
                                             family=sm.families.Poisson()).fit()
-
+                self.model.CustomModelName = "Poisson"
             # Parâmetros do 'modelo_poisson'
             self.library_used = "smf"
 
