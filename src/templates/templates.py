@@ -7,6 +7,7 @@ class DanketsuTemplate():
     modelkwArgs : object
     dataframe : pd.DataFrame
     library : str
+    getLastModel : function
 
 class SMFTemplate():
     '''
