@@ -74,3 +74,22 @@ negativeBiModel  = dkML.getLastModel()
 dkML.lrtest([poissonModel, negativeBiModel])
 
 # %%
+'''
+Executando teste de super dispersão:
+'''
+import sys
+sys.path.append('../src')
+from main import DanketsuML
+import pandas as pd
+
+df_corruption = pd.read_csv('corruption.csv', delimiter=',')
+dkML = DanketsuML(df_corruption) # carregando o dataframe
+# estimando o modelo Poisson, com a lib smf
+dkML.PoissonModel('smf', formula='violations ~ staff + post + corruption')
+dkML.checkOverDisp()
+
+# %%
+df_corruption.columns.to_series().apply(lambda x: type(x))
+
+#%%
+df_corruption.columns[df_corruption.dtypes.values=='object']

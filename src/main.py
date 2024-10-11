@@ -3,9 +3,9 @@ import pandas as pd
 from binomialNegativeModel import BinomialCanonicalFunction, BinomialNegativeModel
 from common.argumentsChecker import argumentChecker, argumentTypeChecker
 from common.modelLibraries import ModelLibraries
+from common.overdisp import OverDisp
 from poissonModel import PoissonCanonicalFunction, PoissonModel
 from lrTest import lrTest
-
 class DanketsuML():
     '''
     Classe para construir modelos mais facilmente (para eu me organizar)
@@ -66,6 +66,21 @@ class DanketsuML():
 
         return BinomialCanonicalFunction()
     
+    def ZeroInflatePoisson(self, library : ModelLibraries = None, **kwargs):
+        '''
+        Implementação feita sobre algumas implementações já disponíveis para
+        o modelo Zero-Inflated Poisson
+
+        LAMBERT, D. Zero-inflated Poisson regression, with an application to defects
+        in manufacturing. Technometrics, v. 34, n. 1, p. 1-14, 1992.
+        '''
+        self.library = library
+        self.modelkwArgs = kwargs
+        ZIPModel = ZeroInflatedPoisson(self)
+        self.makePredictionLastModel = ZIPModel.predictLastModel
+        self.lastShowMethod = ZIPModel.showLastResults
+        self.lastUsedModel = ZIPModel.model
+    
     def lrtest(self,models):
         '''
         Executa o teste da razão da verossimilhança
@@ -74,6 +89,13 @@ class DanketsuML():
             raise Exception("Please, perform a prediction first")
         
         lrTest(models=models, library=self.library)
+
+    def checkOverDisp(self):
+        '''
+        Executa o teste de superdispersão (funciona apenas para a lib smf)
+        '''
+        formula = self.modelkwArgs["formula"]
+        return OverDisp(self, formula=formula)
 
 
 # %%
