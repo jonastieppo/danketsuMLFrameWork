@@ -2,6 +2,7 @@ import pandas as pd
 from common.argumentsChecker import argumentChecker, argumentTypeChecker
 from templates.templates import DanketsuTemplate
 import statsmodels.api as sm # estimação de modelos
+import statsmodels.formula.api as smf # estimação de modelos de contagem
 
 class ZeroInflatedPoisson():
     '''
@@ -16,9 +17,16 @@ class ZeroInflatedPoisson():
             argumentChecker(generalClass.modelkwArgs, "formula")
             argumentChecker(generalClass.modelkwArgs, "comp_logit")
         if bool(argumentTypeChecker(str, formula)*argumentTypeChecker(str,comp_logit)):
+
+
+            self.model = self.__ZIP_fitting_procedure(generalClass.dataframe, formula=formula, comp_logit=comp_logit)
+
+            self.model.CustomModelName = "Zero - Inflated Poisson"
+
+            self.library_used = "smf"
         pass
 
-    def __smfDummiesBugWrap(self, dataframe : pd.Dataframe, formula :  str, comp_logit : str):
+    def __ZIP_fitting_procedure(self, dataframe : pd.DataFrame, formula :  str, comp_logit : str):
         '''
         É necessário dummizar as variáveis categóricas ao 
         se utilizar o ZIP, se não ocorre um erro.
@@ -34,7 +42,7 @@ class ZeroInflatedPoisson():
         first_var = formula.split(' ~ ')[1]
         first_var = first_var.split(' + ')[0]
         others_vars = formula.split(' + ')[1:]
-        preditors = first_var + others_vars
+        preditors = [first_var] + others_vars
         # Definição da variável dependente
 
         y = dataframe[y_column]
@@ -49,9 +57,36 @@ class ZeroInflatedPoisson():
         cols_to_dummy = []
         for each_var in preditors:
             if each_var in object_columns:
-                cols_to_dummy.append(cols_to_dummy)
+                cols_to_dummy.append(each_var)
 
-        x_final_poisson = pd.get_dummies(x_with_const, columns=[cols_to_dummy], dtype=int, drop_first=True)
+        x_final_poisson = pd.get_dummies(x_with_const, columns=cols_to_dummy, dtype=int, drop_first=True)
 
-        # Definição das variáveis preditoras que entração no logit
+        # Definição das variáveis preditoras que entrarão no componente logit (inflate)
+        x_final_logit = dataframe[[comp_logit]]
+        x_final_logit = sm.add_constant(x_final_logit)
+
+        return sm.ZeroInflatedPoisson(y, x_final_poisson, exog_infl=x_final_logit,
+                                    inflation='logit').fit()
+    
+
+    def showLastResults(self):
+
+        if self.library_used=='smf':
+            return self.model.summary()
+
+    def predictLastModel(self, dependentVars: pd.DataFrame):
+        '''
+        Method to predict the last model. 
+
+        dependentVars :  dataFrame of with the vars to be evaluated. Must exist in the original
+        dataframe. 
+
+        Exemple:
+
+        clm.predictLastModel(pd.Dataframe({"distancia":[25], 
+                                        "temperatura":[123.43]
+                                        }))
+        '''
+        if self.library_used=='smf':
+            return self.model.predict(dependentVars)
         

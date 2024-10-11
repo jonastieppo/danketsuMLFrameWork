@@ -6,6 +6,7 @@ from common.modelLibraries import ModelLibraries
 from common.overdisp import OverDisp
 from poissonModel import PoissonCanonicalFunction, PoissonModel
 from lrTest import lrTest
+from zeroInflatedPoission import ZeroInflatedPoisson
 class DanketsuML():
     '''
     Classe para construir modelos mais facilmente (para eu me organizar)
