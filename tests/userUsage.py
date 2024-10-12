@@ -104,3 +104,24 @@ dkML = DanketsuML(df_corruption) # carregando o dataframe
 dkML.ZeroInflatePoisson('smf', formula='violations ~ staff + post + corruption', comp_logit='corruption')
 dkML.getLastModel().summary()
 # %%
+'''
+Executa o teste de Vuong para checar se há a inflação de zeros. Em geral, compara-se o modelo de Poisson com o modelo ZIP
+
+Primeiro, ajusta-se o modelo Poisson, após, ajusta-se o modelo ZIP, e então se faz o teste de Vuong
+'''
+import sys
+sys.path.append('../src')
+from main import DanketsuML
+import pandas as pd
+
+df_corruption = pd.read_csv('corruption.csv', delimiter=',')
+dkML = DanketsuML(df_corruption) # carregando o dataframe
+# Ajustando o modelo Poisson:
+dkML.PoissonModel('smf', formula='violations ~ staff + post + corruption')
+modeloPoisson = dkML.getLastModel()
+# Ajustando o modelo ZIP:
+dkML.ZeroInflatePoisson('smf', formula='violations ~ staff + post + corruption', comp_logit='corruption')
+modeloZip = dkML.getLastModel()
+dkML.vuongTest(modeloPoisson, modeloZip)
+# %%
+

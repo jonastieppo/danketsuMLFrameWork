@@ -4,6 +4,7 @@ from binomialNegativeModel import BinomialCanonicalFunction, BinomialNegativeMod
 from common.argumentsChecker import argumentChecker, argumentTypeChecker
 from common.modelLibraries import ModelLibraries
 from common.overdisp import OverDisp
+from common.vuong_test import VuongTest
 from poissonModel import PoissonCanonicalFunction, PoissonModel
 from lrTest import lrTest
 from zeroInflatedPoission import ZeroInflatedPoisson
@@ -97,6 +98,13 @@ class DanketsuML():
         '''
         formula = self.modelkwArgs["formula"]
         return OverDisp(self, formula=formula)
+    
+    def vuongTest(self, modelo1, modelo2):
+        '''
+        Executa o Teste de Voung
+        '''
+        return VuongTest(model1=modelo1, model2=modelo2)
+        
 
 
 # %%
