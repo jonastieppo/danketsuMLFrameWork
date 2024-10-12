@@ -124,4 +124,29 @@ dkML.ZeroInflatePoisson('smf', formula='violations ~ staff + post + corruption',
 modeloZip = dkML.getLastModel()
 dkML.vuongTest(modeloPoisson, modeloZip)
 # %%
+'''
+Executando comparação entre modelos ZIP e Poisson
+'''
+import sys
+sys.path.append('../src')
+from main import DanketsuML
+import pandas as pd
+from statsmodels.iolib.summary2 import summary_col # comparação entre modelos
 
+df_corruption = pd.read_csv('corruption.csv', delimiter=',')
+dkML = DanketsuML(df_corruption) # carregando o dataframe
+
+dkML.PoissonModel('smf', formula='violations ~ staff + post + corruption')
+modeloPoisson = dkML.getLastModel()
+
+dkML.ZeroInflatePoisson('smf', formula='violations ~ staff + post + corruption', comp_logit='corruption')
+modeloZip = dkML.getLastModel()
+
+summary_col([modeloPoisson, modeloZip], 
+            model_names=["Poisson","ZIP"],
+            stars=True,
+            info_dict = {
+                'N':lambda x: "{0:d}".format(int(x.nobs)),
+                'Log-lik':lambda x: "{:.2f}".format(x.llf)
+                })
+# %%
